@@ -25,6 +25,13 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
+const customerSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  phone: { type: String, required: true },
+});
+
+const Customer = mongoose.model("Customer", customerSchema);
+
 app.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -66,6 +73,45 @@ app.get("/profile", async (req, res) => {
     res.json(user);
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });
+  }
+});
+
+// Create
+app.post("/customers", async (req, res) => {
+  try {
+    const customer = new Customer(req.body);
+    await customer.save();
+    res.status(201).json(customer);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Read all
+app.get("/customers", async (req, res) => {
+  const list = await Customer.find();
+  res.json(list);
+});
+
+// Update
+app.put("/customers/:id", async (req, res) => {
+  try {
+    const updated = await Customer.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Delete
+app.delete("/customers/:id", async (req, res) => {
+  try {
+    await Customer.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 
